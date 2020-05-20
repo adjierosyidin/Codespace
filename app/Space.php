@@ -10,7 +10,7 @@ class Space extends Model
 
     public function photos()
     {
-        return $this->hasMany(SpacePhotos::class, 'space_id', 'id');
+        return $this->hasMany(SpacePhoto::class, 'space_id', 'id');
     }
 
     public function user()
@@ -18,19 +18,20 @@ class Space extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function getSpaces($latitude, $longitude, $radius){
+    public function getSpaces($latitude, $longitude, $radius)
+    {
         return $this->select('spaces.*')
-        ->selectRaw(
-            '( 6371 *
-                acos( cos( radius(?) )*
-                    cos( radians( latitude )) *
-                    cos( radians( longitude ) - radians(?)) +
-                    sin( radians(?) ) *
-                    sin( radians( latitude ) )
-                )
-            ) AS distance', [$latitude, $longitude, $latitude]
-        )
-        ->havingRaw("distance < ?", [$radius])
-        ->orderBy('distance', 'asc');
+            ->selectRaw(
+                '( 6371 *
+                    acos( cos( radians(?) ) *
+                        cos( radians( latitude ) ) *
+                        cos( radians(longitude ) - radians(?)) +
+                        sin( radians(?) ) *
+                        sin( radians( latitude ) )
+                    )
+                ) AS distance', [$latitude, $longitude, $latitude]
+            )
+            ->havingRaw("distance < ?", [$radius])
+            ->orderBy('distance', 'asc');
     }
 }
